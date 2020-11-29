@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
-import { Key } from "../../models/Key";
+import { v4 as uuidv4 } from "uuid";
+import { Key, IKey } from "../../models/Key";
 
 // Router initialization
 const router = Router();
@@ -9,6 +10,36 @@ interface AuthRequest {
   key: string;
   machineId: string;
 }
+
+
+/**
+ * Handles an key create request which will either
+ * Register a new key
+ * Return that they are not admin
+ */
+router.post("/create", async (req: Request, res: Response) => {
+  const authReq: AuthRequest = req.body;
+
+  // Invalid request handler
+  if (!authReq || !authReq.key)
+    return res.status(400).send({ message: "Bad request" });
+
+  let keyResult = await Key.findOne({ key: authReq.key });
+
+  // Invalid key handler or not an admin
+  if (!keyResult || !keyResult.admin) return res.status(401).send({ message: "Invalid key" });
+
+  // Generate a new UUID (a new key)
+  const generatedKey = uuidv4()
+  const key = <IKey>{
+    key: generatedKey,
+  }
+
+  // Create new key in the DB
+  await Key.create(key)
+
+  return res.status(200).send({ message: generatedKey });
+});
 
 /**
  * Handles an authentication request which will either

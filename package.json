@@ -1,5 +1,5 @@
 {
-  "name": "express-mongo-license-api-template",
+  "name": "soucoupe-api",
   "version": "1.0.0",
   "description": "A minimal template for a hardware based licensing and authentication system, written in TypeScript using Express &amp; MongoDB.",
   "main": ".src/app.ts",
@@ -10,17 +10,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arevi/express-mongo-license-api-template.git"
+    "url": "git+https://github.com/soucoupe/soucoupe-api.git"
   },
-  "author": "Armin Dizdarevic",
+  "author": "obito",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/arevi/express-mongo-license-api-template/issues"
+    "url": "https://github.com/soucoupe/soucoupe-api/issues"
   },
-  "homepage": "https://github.com/arevi/express-mongo-license-api-template#readme",
+  "homepage": "https://github.com/soucoupe/soucoupe-api#readme",
   "devDependencies": {
+    "@types/connect-redis": "^0.0.15",
     "@types/express": "^4.17.8",
+    "@types/express-session": "^1.17.3",
+    "@types/ioredis": "^4.17.8",
     "@types/mongoose": "^5.7.36",
+    "@types/node-fetch": "^2.5.7",
+    "@types/uuid": "^8.3.0",
     "@types/webpack": "^4.41.22",
     "@types/webpack-node-externals": "^2.5.0",
     "nodemon-webpack-plugin": "^4.3.2",
@@ -32,8 +37,16 @@
     "webpack-node-externals": "^2.5.2"
   },
   "dependencies": {
+    "connect-redis": "^5.0.0",
+    "discord-oauth2": "^2.6.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
     "helmet": "^4.1.1",
-    "mongoose": "^5.10.5"
+    "ioredis": "^4.19.2",
+    "mongoose": "^5.10.5",
+    "node-fetch": "^2.6.1",
+    "redis": "^3.0.2",
+    "uuid": "^8.3.1"
   }
 }

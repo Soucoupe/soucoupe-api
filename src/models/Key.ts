@@ -6,6 +6,7 @@ import { Schema, model, Document } from "mongoose";
 export interface IKey extends Document {
   key: string;
   machineId: string | null;
+  admin: boolean | null;
   createdDate: Date;
 }
 
@@ -20,6 +21,12 @@ const keySchema = new Schema({
   },
   machineId: {
     type: String,
+    required: false,
+    unique: false,
+  },
+  admin: {
+    type: Boolean,
+    default: false,
     required: false,
     unique: false,
   },
