@@ -5,6 +5,8 @@ import { Schema, model, Document } from "mongoose";
  */
 export interface IKey extends Document {
   key: string;
+  discordId: string | null;
+  discordUsername: string | null;
   machineId: string | null;
   admin: boolean | null;
   createdDate: Date;
@@ -18,6 +20,16 @@ const keySchema = new Schema({
     type: String,
     required: true,
     unique: true,
+  },
+  discordId: {
+    type: String,
+    required: false,
+    unique: false,
+  },
+  discordUsername: {
+    type: String,
+    required: false,
+    unique: false,
   },
   machineId: {
     type: String,

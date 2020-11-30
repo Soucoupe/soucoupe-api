@@ -18,7 +18,7 @@ router.get("/auth", async (req: Request, res: Response) => {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=guilds.join%20identify`)
 });
 
-router.get('/callback', async (req: Request, res: Response) => {
+router.get("/callback", async (req: Request, res: Response) => {
     const { code } = req.query;
 
     if (!code) return res.status(401).json({ message: "Invalid code" });
@@ -40,15 +40,16 @@ router.get('/callback', async (req: Request, res: Response) => {
                 Authorization: `Bearer ${token.access_token}`
             }
         });
-        const userData = await userRes.json() 
+        const userData = await userRes.json()
         if (userRes.status != 200) return res.status(401).json({ error: userData.message });
 
-        return res.status(200).json({ data: userData.data });
+        console.log(req.session)
+
+        return res.status(200).json({ data: userData });
     } catch (err) {
-       return res.status(500).json({ message: err.message })
+        return res.status(500).json({ message: err.message })
     }
 });
-  
-  // Export AuthRouter
-  export default router;
-  
+
+// Export AuthRouter
+export default router;

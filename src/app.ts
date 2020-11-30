@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { redis } from "./service/redis"
 import { handlers } from "./routes/index";
 import { connectDatabase } from "./service/database";
+import { connectDiscord } from "./service/discord";
 import session from "express-session";
 import connectRedis from "connect-redis";
 
@@ -21,7 +22,6 @@ const RedisStore = connectRedis(session);
 // Express Configuration
 app.use(helmet());
 app.use(express.json());
-
 app.use(
   session({
     store: new RedisStore({
@@ -32,7 +32,6 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
     }
@@ -57,5 +56,6 @@ const startServer = async () => {
 
 (async () => {
   startServer();
+  connectDiscord();
   connectDatabase();
 })();

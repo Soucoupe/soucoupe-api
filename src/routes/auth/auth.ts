@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { Key, IKey } from "../../models/Key";
+import { bot } from "../../service/discord"
 
 // Router initialization
 const router = Router();
@@ -9,8 +10,8 @@ const router = Router();
 interface AuthRequest {
   key: string;
   machineId: string;
+  discordId: string;
 }
-
 
 /**
  * Handles an key create request which will either
@@ -53,22 +54,27 @@ router.post("/verify", async (req: Request, res: Response) => {
   // Invalid request handler
   if (!authReq || !authReq.key || !authReq.machineId)
     return res.status(400).send({ message: "Bad request" });
-
+  
   let keyResult = await Key.findOne({ key: authReq.key });
 
   // Invalid key handler
   if (!keyResult) return res.status(401).send({ message: "Invalid key" });
 
+  // Invalid discordId handler
+  if (!keyResult.discordId) return res.status(401).send({ message: "Link your Discord on the dashboard first." }); 
+
   // Key authentication handler
   if (!keyResult.machineId) {
     // Updates the machineId in the database to the supplied key
     keyResult.machineId = authReq.machineId;
+
     await keyResult.save();
-    return res.status(200).send({ message: "Success" });
+
+    return res.status(200).send({ message: "Success", username: keyResult.discordUsername });
   } else {
     // MachineId exists within DB, return result based on if the supplied machineId matches the DB entry
     return keyResult.machineId == authReq.machineId
-      ? res.status(200).json({ message: "Success" })
+      ? res.status(200).json({ message: "Success", username: keyResult.discordUsername })
       : res.status(401).send({ message: "The key is already bound." });
   }
 });
@@ -90,9 +96,67 @@ router.post("/reset", async (req: Request, res: Response) => {
 
   // Sets machineId to empty string and returns success
   keyResult.machineId = null;
+
   await keyResult.save();
   return res.status(200).json({ message: "Key reset" });
 });
+
+
+/**
+ * Handles an unbind request to have a discordId unbound from a key
+ */
+router.post("/unbind", async (req: Request, res: Response) => {
+  const authReq: AuthRequest = req.body;
+
+  // Invalid request handler
+  if (!authReq || !authReq.key)
+    return res.status(400).json({ message: "Bad request" });
+
+  let keyResult = await Key.findOne({ key: authReq.key });
+
+  // Invalid key handler
+  if (!keyResult) return res.status(401).json({ message: "Invalid key" });
+
+  if (!keyResult.discordId) return res.status(401).json({ message: "The key is already unbound." });
+
+  // Sets discordId to empty string and returns success
+  keyResult.discordId = null;
+  keyResult.discordUsername = null;
+
+  await keyResult.save();
+  return res.status(200).json({ message: "Success" });
+});
+
+/**
+ * Handles a bind request to have a discordId bound to a key
+ */
+router.post("/bind", async (req: Request, res: Response) => {
+  const authReq: AuthRequest = req.body;
+
+  // Invalid request handler
+  if (!authReq || !authReq.key || !authReq.discordId)
+    return res.status(400).json({ message: "Bad request" });
+
+  let keyResult = await Key.findOne({ key: authReq.key });
+
+  // Invalid key handler
+  if (!keyResult) return res.status(401).json({ message: "Invalid key" });
+
+  // Key already binded                                                                         
+  if (keyResult.discordId) return res.status(401).send({ message: "The key is already bound." });
+
+  const discordUser = await bot.getRESTUser(authReq.discordId);
+
+  if (!discordUser) return res.status(401).send({ message: "Discord user not found" });
+
+  // Sets discordId to given discordId and returns success
+  keyResult.discordId = authReq.discordId;
+  keyResult.discordUsername = `${discordUser.username}#${discordUser.discriminator}`
+  
+  await keyResult.save();
+  return res.status(200).json({ message: "Success" });
+});
+
 
 /**
  * Handles a heartbeat request to ensure the machineID

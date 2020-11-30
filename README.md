@@ -6,7 +6,7 @@ A minimal template for a hardware based licensing and authentication system, wri
 
 ## Getting Started
 
-1. Git clone https://github.com/arevi/express-mongo-license-api-template.git
+1. Git clone https://github.com/soucoupe/soucoupe-api.git
 2. npm install
 
 3. Rename the "database.sample.ts" file to "database.ts"
@@ -67,6 +67,46 @@ POST
 
 &nbsp;
 
+### Auth/Bind (POST)
+
+---
+
+The request route provides a convenient API route for adding the association of a discordId to a license key.
+
+_Example Payload_
+
+```
+POST
+
+{
+    "key":"123456",
+    "discordId": "714498109777903626",
+    "discordUsername": "uzi#2322"
+}
+```
+
+&nbsp;
+
+### Auth/Bind (POST)
+
+---
+
+The request route provides a convenient API route for removing the association of a discordId to a license key.
+
+_Example Payload_
+
+```
+POST
+
+{
+    "key":"123456",
+    "discordId": "714498109777903626",
+}
+```
+
+&nbsp;
+
+
 ### Auth/Heartbeat (Get)
 
 ---
@@ -93,7 +133,8 @@ To keep the project minimal and simplified the API provides a preset number of r
 
 ```
 {
-    "message": "Success"
+    "message": "Success",
+    "username": "uzi#2322"
 }
 ```
 
@@ -124,5 +165,17 @@ To keep the project minimal and simplified the API provides a preset number of r
 ```
 {
     "message":"The key is already bound."
+}
+```
+
+```
+{
+    "message":"The key is already unbound."
+}
+```
+
+```
+{
+    "message":"Link your Discord on the dashboard first."
 }
 ```
