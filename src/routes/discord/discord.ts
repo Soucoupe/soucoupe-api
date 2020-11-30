@@ -43,7 +43,9 @@ router.get("/callback", async (req: Request, res: Response) => {
         const userData = await userRes.json()
         if (userRes.status != 200) return res.status(401).json({ error: userData.message });
 
-        console.log(req.session)
+        // TODO: set userid in the session
+        
+        // req.session!.userId = userData.id
 
         return res.status(200).json({ data: userData });
     } catch (err) {
