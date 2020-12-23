@@ -53,15 +53,15 @@ router.post("/verify", async (req: Request, res: Response) => {
 
   // Invalid request handler
   if (!authReq || !authReq.key || !authReq.machineId)
-    return res.status(400).send({ message: "Bad request" });
-  
+    return res.status(400).send({ error: { message: "Bad request" }});
+
   let keyResult = await Key.findOne({ key: authReq.key });
 
   // Invalid key handler
-  if (!keyResult) return res.status(401).send({ message: "Invalid key" });
+  if (!keyResult) return res.status(401).send({ error: { message: "Invalid key" } });
 
   // Invalid discordId handler
-  if (!keyResult.discordId) return res.status(401).send({ message: "Link your Discord on the dashboard first." }); 
+  if (!keyResult.discordId) return res.status(401).send({ error: { message: "Link your Discord on the dashboard first." } });
 
   // Key authentication handler
   if (!keyResult.machineId) {
@@ -75,7 +75,7 @@ router.post("/verify", async (req: Request, res: Response) => {
     // MachineId exists within DB, return result based on if the supplied machineId matches the DB entry
     return keyResult.machineId == authReq.machineId
       ? res.status(200).json({ message: "Success", username: keyResult.discordUsername })
-      : res.status(401).send({ message: "The key is already bound." });
+      : res.status(401).send({ error: { message: "The key is already bound." } });
   }
 });
 
@@ -87,12 +87,12 @@ router.post("/reset", async (req: Request, res: Response) => {
 
   // Invalid request handler
   if (!authReq || !authReq.key)
-    return res.status(400).json({ message: "Bad request" });
+    return res.status(400).json({ error: { message: "Bad request" } });
 
   let keyResult = await Key.findOne({ key: authReq.key });
 
   // Invalid key handler
-  if (!keyResult) return res.status(401).json({ message: "Invalid key" });
+  if (!keyResult) return res.status(401).json({ error: { message: "Invalid key" } });
 
   // Sets machineId to empty string and returns success
   keyResult.machineId = null;
@@ -110,14 +110,14 @@ router.post("/unbind", async (req: Request, res: Response) => {
 
   // Invalid request handler
   if (!authReq || !authReq.key)
-    return res.status(400).json({ message: "Bad request" });
+    return res.status(400).json({ error: { message: "Bad request" } });
 
   let keyResult = await Key.findOne({ key: authReq.key });
 
   // Invalid key handler
-  if (!keyResult) return res.status(401).json({ message: "Invalid key" });
+  if (!keyResult) return res.status(401).json({ error: { message: "Invalid key" } });
 
-  if (!keyResult.discordId) return res.status(401).json({ message: "The key is already unbound." });
+  if (!keyResult.discordId) return res.status(401).json({ error: { message: "The key is already unbound." } });
 
   // Sets discordId to empty string and returns success
   keyResult.discordId = null;
@@ -135,24 +135,24 @@ router.post("/bind", async (req: Request, res: Response) => {
 
   // Invalid request handler
   if (!authReq || !authReq.key || !authReq.discordId)
-    return res.status(400).json({ message: "Bad request" });
+    return res.status(400).json({ error: { message: "Bad request" } });
 
   let keyResult = await Key.findOne({ key: authReq.key });
 
   // Invalid key handler
-  if (!keyResult) return res.status(401).json({ message: "Invalid key" });
+  if (!keyResult) return res.status(401).json({ error: { message: "Invalid key" } });
 
   // Key already binded                                                                         
-  if (keyResult.discordId) return res.status(401).send({ message: "The key is already bound." });
+  if (keyResult.discordId) return res.status(401).send({ error: { message: "The key is already bound." } });
 
   const discordUser = await bot.getRESTUser(authReq.discordId);
 
-  if (!discordUser) return res.status(401).send({ message: "Discord user not found" });
+  if (!discordUser) return res.status(401).send({ error: { message: "Discord user not found" } });
 
   // Sets discordId to given discordId and returns success
   keyResult.discordId = authReq.discordId;
   keyResult.discordUsername = `${discordUser.username}#${discordUser.discriminator}`
-  
+
   await keyResult.save();
   return res.status(200).json({ message: "Success" });
 });

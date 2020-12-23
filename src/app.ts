@@ -7,7 +7,7 @@ import { connectDatabase } from "./service/database";
 import { connectDiscord } from "./service/discord";
 import session from "express-session";
 import connectRedis from "connect-redis";
-
+import * as http from 'http';
 
 // Express intiialization
 const app = express();
@@ -21,7 +21,14 @@ const RedisStore = connectRedis(session);
 
 // Express Configuration
 app.use(helmet());
-app.use(express.json());
+app.use(express.json({
+  verify: function (req: http.IncomingMessage, res: http.ServerResponse, buf: Buffer, encoding: string) {
+    if (req.url!.startsWith("/stripe/webhook")) {
+      req.rawBody = buf.toString();
+    }
+  },
+}));
+
 app.use(
   session({
     store: new RedisStore({
@@ -40,6 +47,7 @@ app.use(
 // Route handlers
 app.use("/auth", handlers.AuthRouter);
 app.use("/discord", handlers.DiscordRouter);
+app.use("/stripe", handlers.StripeRouter);
 
 
 /**

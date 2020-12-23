@@ -8,7 +8,7 @@ const router = Router();
 // Setup Discord client ID/Secret
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
-const REDIRECT_URI = 'http://localhost:8080/discord/callback'
+const REDIRECT_URI = 'http://localhost:4000/discord/callback'
 
 /**
  * Handles discord OAuth
@@ -41,15 +41,17 @@ router.get("/callback", async (req: Request, res: Response) => {
             }
         });
         const userData = await userRes.json()
-        if (userRes.status != 200) return res.status(401).json({ error: userData.message });
+        if (userRes.status != 200) return res.status(401).json({ error: { message: userData.message } });
 
         // TODO: set userid in the session
-        
-        // req.session!.userId = userData.id
 
+        req.session.userId = userData.id
+
+        console.log(req.session.userId);
+        
         return res.status(200).json({ data: userData });
     } catch (err) {
-        return res.status(500).json({ message: err.message })
+        return res.status(400).json({ error: { message: err.message } })
     }
 });
 
